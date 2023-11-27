@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-runner-deployment
+spec:
+  replicas: 1  # Initial number of replicas
+  selector:
+    matchLabels:
+      app: github-runner
+  template:
+    metadata:
+      labels:
+        app: github-runner
+    spec:
+      containers:
+      - name: github-runner
+        image: ghcr.io/username/github-runner-image:latest  # Replace with your GitHub Actions Runner image
+        env:
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: github-token
+              key: "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"
+        resources:
+          requests:
+            cpu: "0.1"
+            memory: "256Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: github-runner-service
+spec:
+  selector:
+    app: github-runner
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer  # Change to ClusterIP or NodePort based on your requirements
